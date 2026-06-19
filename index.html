@@ -321,6 +321,29 @@
       padding: 18px;
     }
     .complete.show { display: block; }
+    .locked-gate {
+      display: none;
+      text-align: center;
+      padding: 18px;
+    }
+    .locked-gate.show { display: block; }
+    .locked-gate .lock-symbol {
+      width: min(170px, 52vw);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 16px;
+      border: 6px solid rgba(246, 184, 61, 0.8);
+      border-radius: 50%;
+      background: #fff4bd;
+      font-size: clamp(3rem, 9vw, 5rem);
+      box-shadow: 0 0 28px rgba(246, 184, 61, 0.38);
+    }
+    .locked-gate p {
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+    }
     .trophy {
       width: min(210px, 62vw);
       aspect-ratio: 1;
@@ -739,9 +762,15 @@
 
   <div class="modal" id="gateModal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
     <div class="dialog">
+      <div class="locked-gate" id="lockedGateView">
+        <div class="lock-symbol">🔒</div>
+        <h2>詩仙寶藏之門還沒開</h2>
+        <p id="lockedGateText">還需要完成所有關卡，集滿四個寶物，石門才會亮起。</p>
+        <button class="btn" id="lockedGateCloseBtn" type="button">回到大地圖</button>
+      </div>
       <div class="gate-game" id="gateGame">
         <h2 id="gateTitle">🔒 通關大門</h2>
-        <p>把背包裡的憑證拖到正確凹槽。持有不足 4 個也可以先試，四個都放對才會開門。</p>
+        <p>四個寶物都集滿了。把背包裡的寶石拖到正確凹槽，四個都放對，詩仙寶藏之門就會打開。</p>
         <div class="slots" id="slots"></div>
         <h3>背包欄</h3>
         <div class="backpack" id="backpack"></div>
@@ -917,6 +946,9 @@
       endingCard: document.getElementById("endingCard"),
       storyMusic: document.getElementById("storyMusic"),
       gateModal: document.getElementById("gateModal"),
+      lockedGateView: document.getElementById("lockedGateView"),
+      lockedGateText: document.getElementById("lockedGateText"),
+      lockedGateCloseBtn: document.getElementById("lockedGateCloseBtn"),
       slots: document.getElementById("slots"),
       backpack: document.getElementById("backpack"),
       gateGame: document.getElementById("gateGame"),
@@ -968,8 +1000,21 @@
     }
 
     function openGate() {
+      if (heldLevels().length < levels.length) {
+        showLockedGate();
+        els.gateModal.classList.add("show");
+        return;
+      }
       renderGate();
       els.gateModal.classList.add("show");
+    }
+
+    function showLockedGate() {
+      const missing = levels.length - heldLevels().length;
+      els.lockedGateText.textContent = `還差 ${missing} 個寶物。先完成四個關卡，集滿詩句水晶、文字玉佩、詩意翡翠和詩人印章，詩仙寶藏之門才會開啟。`;
+      els.lockedGateView.classList.add("show");
+      els.gateGame.classList.add("hide");
+      els.completeView.classList.remove("show");
     }
 
     function openStory(type, targetHref) {
@@ -1067,6 +1112,7 @@
 
     function renderGate() {
       placed.clear();
+      els.lockedGateView.classList.remove("show");
       els.gateGame.classList.remove("hide");
       els.completeView.classList.remove("show");
       els.slots.innerHTML = levels.map(level => `
@@ -1160,6 +1206,7 @@
     }
 
     function showComplete() {
+      els.lockedGateView.classList.remove("show");
       els.gateGame.classList.add("hide");
       els.completeView.classList.add("show");
       const start = Number(localStorage.getItem("adventure_start") || Date.now());
@@ -1176,14 +1223,14 @@
         localStorage.setItem("adventure_start", String(Date.now()));
       }
       renderProgress();
-      if (els.gateModal.classList.contains("show")) renderGate();
+      if (els.gateModal.classList.contains("show")) openGate();
     }
 
     function bindControls() {
       document.querySelectorAll(".hotspot").forEach(hotspot => {
         hotspot.addEventListener("click", () => {
           if (hotspot.dataset.action === "gate") {
-            openStory("ending");
+            openGate();
             return;
           }
           const level = levels[Number(hotspot.dataset.index)];
@@ -1198,9 +1245,11 @@
         if (event.key === "Enter" || event.key === " ") hideEndingCard();
       });
       els.resetSlotsBtn.addEventListener("click", renderGate);
+      els.lockedGateCloseBtn.addEventListener("click", () => els.gateModal.classList.remove("show"));
       els.closeModalBtn.addEventListener("click", () => els.gateModal.classList.remove("show"));
       els.againBtn.addEventListener("click", () => {
-        clearAll(true);
+        localStorage.clear();
+        sessionStorage.clear();
         window.location.reload();
       });
       els.gateModal.addEventListener("click", event => {
