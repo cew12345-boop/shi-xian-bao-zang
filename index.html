@@ -321,6 +321,93 @@
       padding: 18px;
     }
     .complete.show { display: block; }
+    .certificate-tools {
+      display: grid;
+      gap: 12px;
+      max-width: 760px;
+      margin: 18px auto 0;
+      padding: 14px;
+      border: 2px solid rgba(112, 70, 24, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.42);
+    }
+    .certificate-form {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .certificate-form label {
+      font-weight: 950;
+    }
+    .certificate-form input {
+      width: min(280px, 100%);
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 2px solid rgba(112, 70, 24, 0.25);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fffdf2;
+      font: inherit;
+      font-weight: 900;
+      text-align: center;
+    }
+    .certificate-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .certificate-print {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+      border: 7px double #b86b2f;
+      border-radius: 8px;
+      color: #3c230e;
+      background:
+        radial-gradient(circle at 50% 8%, rgba(246, 184, 61, 0.22), transparent 15rem),
+        linear-gradient(90deg, rgba(116, 74, 35, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(116, 74, 35, 0.08) 1px, transparent 1px),
+        #fff4c4;
+      background-size: auto, 20px 20px, 20px 20px, auto;
+      box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.38);
+      text-align: center;
+    }
+    .certificate-print h3 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3vw, 2.3rem);
+      letter-spacing: 0;
+    }
+    .certificate-name {
+      margin: 14px auto 10px;
+      padding: 8px 12px;
+      border-bottom: 4px solid rgba(184, 107, 47, 0.54);
+      width: min(360px, 100%);
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      font-weight: 950;
+      line-height: 1.2;
+    }
+    .certificate-print p {
+      margin: 8px 0;
+      font-weight: 950;
+      line-height: 1.65;
+    }
+    .certificate-stamps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .certificate-stamps span {
+      padding: 8px 10px;
+      border-radius: 999px;
+      color: #104c41;
+      background: #dffaf0;
+      font-weight: 950;
+    }
     .locked-gate {
       display: none;
       text-align: center;
@@ -691,6 +778,27 @@
       .stone-door { width: 180px; height: 230px; }
       .treasure-slot { width: 40px; height: 40px; }
     }
+    @media print {
+      body {
+        background: #fff;
+        overflow: visible;
+      }
+      body * {
+        visibility: hidden !important;
+      }
+      .certificate-print,
+      .certificate-print * {
+        visibility: visible !important;
+      }
+      .certificate-print {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 92vw;
+        transform: translate(-50%, -50%);
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -783,7 +891,30 @@
         <div class="trophy">詩仙<br>寶藏</div>
         <h2>🏆 冒險完成！</h2>
         <p id="timeText">總冒險時長：00 分 00 秒</p>
-        <button class="btn" id="againBtn" type="button">再次冒險</button>
+        <div class="certificate-tools">
+          <div class="certificate-form">
+            <label for="studentName">學生姓名</label>
+            <input id="studentName" type="text" maxlength="12" placeholder="請輸入姓名">
+          </div>
+          <div class="certificate-print" id="certificatePrint" aria-label="唐詩大冒險通關證書">
+            <h3>唐詩大冒險通關證書</h3>
+            <div class="certificate-name" id="certificateName">小小詩人</div>
+            <p>完成《四印之謎：唐詩冒險王》</p>
+            <p>榮獲「唐詩守護者」徽章</p>
+            <p id="certificateTime">冒險時長：00 分 00 秒</p>
+            <div class="certificate-stamps">
+              <span>詩句水晶</span>
+              <span>文字玉佩</span>
+              <span>詩意翡翠</span>
+              <span>詩人印章</span>
+            </div>
+          </div>
+          <div class="certificate-actions">
+            <button class="btn secondary" id="printCertBtn" type="button">列印證書</button>
+            <button class="btn secondary" id="downloadCertBtn" type="button">下載證書</button>
+            <button class="btn" id="againBtn" type="button">再次冒險</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -954,6 +1085,11 @@
       gateGame: document.getElementById("gateGame"),
       completeView: document.getElementById("completeView"),
       timeText: document.getElementById("timeText"),
+      studentName: document.getElementById("studentName"),
+      certificateName: document.getElementById("certificateName"),
+      certificateTime: document.getElementById("certificateTime"),
+      printCertBtn: document.getElementById("printCertBtn"),
+      downloadCertBtn: document.getElementById("downloadCertBtn"),
       resetSlotsBtn: document.getElementById("resetSlotsBtn"),
       closeModalBtn: document.getElementById("closeModalBtn"),
       againBtn: document.getElementById("againBtn")
@@ -1214,6 +1350,116 @@
       const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
       const seconds = String(totalSeconds % 60).padStart(2, "0");
       els.timeText.textContent = `總冒險時長：${minutes} 分 ${seconds} 秒`;
+      els.certificateTime.textContent = `冒險時長：${minutes} 分 ${seconds} 秒`;
+      updateCertificateName();
+    }
+
+    function updateCertificateName() {
+      const name = (els.studentName.value || "").trim();
+      els.certificateName.textContent = name || "小小詩人";
+    }
+
+    function certificateData() {
+      return {
+        name: (els.studentName.value || "").trim() || "小小詩人",
+        time: els.certificateTime.textContent.replace("冒險時長：", ""),
+        date: new Date().toLocaleDateString("zh-TW", {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        })
+      };
+    }
+
+    function drawCenteredText(ctx, text, x, y, maxWidth, font, color = "#3c230e") {
+      ctx.font = font;
+      ctx.fillStyle = color;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      let display = text;
+      while (ctx.measureText(display).width > maxWidth && display.length > 1) {
+        display = display.slice(0, -1);
+      }
+      ctx.fillText(display, x, y);
+    }
+
+    function roundedRectPath(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function downloadCertificate() {
+      updateCertificateName();
+      const data = certificateData();
+      const canvas = document.createElement("canvas");
+      canvas.width = 1600;
+      canvas.height = 1050;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#fff4c4";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(116, 74, 35, 0.12)";
+      ctx.lineWidth = 2;
+      for (let x = 0; x <= canvas.width; x += 36) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= canvas.height; y += 36) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#b86b2f";
+      ctx.lineWidth = 18;
+      ctx.strokeRect(70, 70, 1460, 910);
+      ctx.lineWidth = 5;
+      ctx.strokeRect(105, 105, 1390, 840);
+
+      drawCenteredText(ctx, "唐詩大冒險通關證書", 800, 190, 1200, "900 72px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif");
+      drawCenteredText(ctx, data.name, 800, 350, 900, "900 92px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif", "#8b3f24");
+
+      ctx.strokeStyle = "rgba(184, 107, 47, 0.55)";
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(470, 420);
+      ctx.lineTo(1130, 420);
+      ctx.stroke();
+
+      drawCenteredText(ctx, "完成《四印之謎：唐詩冒險王》", 800, 520, 1200, "900 46px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif");
+      drawCenteredText(ctx, "榮獲「唐詩守護者」徽章", 800, 595, 1200, "900 50px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif", "#116c75");
+      drawCenteredText(ctx, `冒險時長：${data.time}`, 800, 680, 1100, "900 38px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif");
+      drawCenteredText(ctx, data.date, 800, 745, 900, "900 34px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif", "#6d3d1d");
+
+      const stamps = ["詩句水晶", "文字玉佩", "詩意翡翠", "詩人印章"];
+      stamps.forEach((stamp, index) => {
+        const x = 410 + index * 260;
+        ctx.fillStyle = "#dffaf0";
+        ctx.strokeStyle = "#1c9b83";
+        ctx.lineWidth = 4;
+        roundedRectPath(ctx, x - 92, 820, 184, 58, 28);
+        ctx.fill();
+        ctx.stroke();
+        drawCenteredText(ctx, stamp, x, 849, 160, "900 27px 'Noto Sans TC', 'Microsoft JhengHei', sans-serif", "#104c41");
+      });
+
+      const link = document.createElement("a");
+      link.download = `唐詩大冒險通關證書-${data.name}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     }
 
     function clearAll(clearSession) {
@@ -1240,6 +1486,12 @@
       els.clearBtn.addEventListener("click", () => clearAll(false));
       els.storyNextBtn.addEventListener("click", continueStory);
       els.storyCloseBtn.addEventListener("click", closeStory);
+      els.studentName.addEventListener("input", updateCertificateName);
+      els.printCertBtn.addEventListener("click", () => {
+        updateCertificateName();
+        window.print();
+      });
+      els.downloadCertBtn.addEventListener("click", downloadCertificate);
       els.endingCard.addEventListener("click", hideEndingCard);
       els.endingCard.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") hideEndingCard();
