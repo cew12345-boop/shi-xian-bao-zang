@@ -724,6 +724,8 @@
     </div>
   </div>
 
+  <audio id="storyMusic" src="Ink_and_Morning_Dew.mp3" preload="auto" loop></audio>
+
   <div class="modal" id="gateModal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
     <div class="dialog">
       <div class="gate-game" id="gateGame">
@@ -902,6 +904,7 @@
       storyNextBtn: document.getElementById("storyNextBtn"),
       storyCloseBtn: document.getElementById("storyCloseBtn"),
       endingCard: document.getElementById("endingCard"),
+      storyMusic: document.getElementById("storyMusic"),
       gateModal: document.getElementById("gateModal"),
       slots: document.getElementById("slots"),
       backpack: document.getElementById("backpack"),
@@ -960,6 +963,7 @@
     function openStory(type, targetHref) {
       const story = stories[type];
       storyTarget = { type, targetHref };
+      playStoryMusic();
       els.storyKicker.textContent = story.kicker;
       els.storyTitle.textContent = story.title;
       els.storyScene.dataset.scene = story.scene;
@@ -978,16 +982,19 @@
     function closeStory() {
       els.storyOverlay.classList.remove("show");
       storyTarget = null;
+      stopStoryMusic();
     }
 
     function continueStory() {
       if (!storyTarget) return;
       if (storyTarget.type === "ending") {
-        closeStory();
+        els.storyOverlay.classList.remove("show");
+        storyTarget = null;
         showEndingCard();
         return;
       }
       sessionStorage.setItem("adventure_cover_seen", "true");
+      stopStoryMusic();
       window.location.href = storyTarget.targetHref;
     }
 
@@ -997,6 +1004,23 @@
 
     function hideEndingCard() {
       els.endingCard.classList.remove("show");
+      stopStoryMusic();
+    }
+
+    function playStoryMusic() {
+      if (!els.storyMusic) return;
+      els.storyMusic.volume = 0.42;
+      els.storyMusic.currentTime = 0;
+      const playPromise = els.storyMusic.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    }
+
+    function stopStoryMusic() {
+      if (!els.storyMusic) return;
+      els.storyMusic.pause();
+      els.storyMusic.currentTime = 0;
     }
 
     function renderGate() {
