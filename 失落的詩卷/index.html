@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>失落的詩卷｜低年級唐詩 RPG</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --ink: #39220f;
+      --paper: #fff8dd;
+      --paper-deep: #f5dc9a;
+      --jade: #1f9c82;
+      --sky: #68b8cf;
+      --rose: #d65d68;
+      --gold: #f5b83b;
+      --night: #16314c;
+      --shadow: rgba(37, 22, 7, 0.22);
+    }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(245, 184, 59, 0.34), transparent 18rem),
+        radial-gradient(circle at 86% 18%, rgba(104, 184, 207, 0.32), transparent 17rem),
+        linear-gradient(180deg, #d7f2ed 0%, #fdf1c5 54%, #e9c076 100%);
+      overflow-x: hidden;
+    }
+    button {
+      color: inherit;
+      font: inherit;
+    }
+    .game {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px clamp(12px, 3vw, 28px);
+      color: #fffdf1;
+      background: rgba(22, 49, 76, 0.88);
+      box-shadow: 0 10px 28px rgba(20, 30, 40, 0.22);
+      backdrop-filter: blur(8px);
+    }
+    .brand {
+      min-width: 0;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .avatar {
+      width: 56px;
+      height: 56px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 3px solid #fff5bc;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffe487, #ec734e);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.16), 0 10px 18px rgba(0, 0, 0, 0.22);
+      font-size: 2rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 2.25rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 5px 0 0;
+      color: rgba(255, 253, 241, 0.84);
+      font-weight: 850;
+      line-height: 1.35;
+    }
+    .status {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: end;
+      flex-wrap: wrap;
+    }
+    .pill {
+      min-height: 38px;
+      display: inline-grid;
+      place-items: center;
+      padding: 7px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 999px;
+      color: #fffbe6;
+      background: rgba(255, 255, 255, 0.13);
+      font-weight: 950;
+      white-space: nowrap;
+    }
+    .btn {
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 950;
+      box-shadow: 0 8px 16px rgba(54, 31, 9, 0.16);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      color: #39220f;
+      background: linear-gradient(135deg, #fff0a8, #f5b83b);
+    }
+    .btn.secondary {
+      color: #fffdf1;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+    .world {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(230px, 300px) minmax(0, 1fr) minmax(230px, 300px);
+      gap: 18px;
+      align-items: stretch;
+      width: min(1380px, 100%);
+      margin: 0 auto;
+      padding: clamp(14px, 2.5vw, 28px);
+    }
+    .world::before {
+      content: "";
+      position: fixed;
+      inset: auto 0 0;
+      height: 38vh;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, transparent 0 42%, rgba(82, 132, 81, 0.38) 42% 48%, transparent 48%),
+        linear-gradient(40deg, transparent 0 48%, rgba(44, 112, 96, 0.22) 48% 55%, transparent 55%);
+      opacity: 0.7;
+    }
+    .panel {
+      position: relative;
+      z-index: 1;
+      border: 2px solid rgba(116, 72, 21, 0.23);
+      border-radius: 8px;
+      background: rgba(255, 248, 221, 0.88);
+      box-shadow: 0 18px 42px rgba(63, 42, 18, 0.16);
+    }
+    .side {
+      padding: 16px;
+    }
+    .side h2,
+    .side h3 {
+      margin: 0 0 10px;
+      font-size: 1.12rem;
+      line-height: 1.25;
+    }
+    .level-list {
+      display: grid;
+      gap: 8px;
+    }
+    .level-btn {
+      width: 100%;
+      min-height: 56px;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 28px;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 2px solid rgba(95, 66, 25, 0.14);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.48);
+      cursor: pointer;
+      text-align: left;
+      font-weight: 950;
+    }
+    .level-btn.active {
+      border-color: rgba(31, 156, 130, 0.84);
+      background: #eafff6;
+      box-shadow: 0 0 0 4px rgba(31, 156, 130, 0.16);
+    }
+    .level-btn.done {
+      border-color: rgba(245, 184, 59, 0.82);
+      background: #fff3bf;
+    }
+    .level-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .star {
+      display: grid;
+      place-items: center;
+      color: #ad6d00;
+      font-size: 1.25rem;
+    }
+    .story-card {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 8px;
+      color: #fffdf1;
+      background:
+        radial-gradient(circle at 85% 0%, rgba(245, 184, 59, 0.34), transparent 7rem),
+        linear-gradient(150deg, #24567a, #1f6d6a);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    }
+    .story-card p {
+      margin: 0;
+      font-weight: 850;
+      line-height: 1.65;
+    }
+    .board {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
+    .scene {
+      position: relative;
+      min-height: clamp(240px, 28vw, 360px);
+      display: grid;
+      grid-template-columns: minmax(120px, 190px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: end;
+      padding: 18px 20px 20px;
+      color: #fffdf1;
+      background:
+        linear-gradient(90deg, rgba(22, 49, 76, 0.72), rgba(22, 49, 76, 0.22) 42%, rgba(67, 36, 12, 0.38)),
+        url("assets/scroll-level-bg.png") center / cover no-repeat;
+    }
+    .scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 58% 38%, rgba(255, 231, 130, 0.32), transparent 12rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(42, 25, 9, 0.18));
+    }
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 42%;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent, rgba(40, 24, 8, 0.46));
+    }
+    .hero {
+      position: relative;
+      z-index: 2;
+      width: min(160px, 100%);
+      aspect-ratio: 1;
+      align-self: end;
+      justify-self: center;
+      filter: drop-shadow(0 14px 12px rgba(24, 31, 36, 0.22));
+    }
+    .hero .head {
+      position: absolute;
+      left: 30%;
+      top: 18%;
+      width: 40%;
+      height: 36%;
+      border-radius: 48% 48% 44% 44%;
+      background: #ffe0ad;
+      border: 3px solid #4c2a15;
+    }
+    .hero .hair {
+      position: absolute;
+      left: 26%;
+      top: 12%;
+      width: 48%;
+      height: 24%;
+      border-radius: 50% 50% 12px 12px;
+      background: #3a2418;
+    }
+    .hero .hat {
+      position: absolute;
+      left: 21%;
+      top: 2%;
+      width: 58%;
+      height: 22%;
+      border-radius: 50% 50% 8px 8px;
+      background: #214f78;
+      border: 3px solid #fff5bc;
+    }
+    .hero .eye {
+      position: absolute;
+      top: 35%;
+      width: 5%;
+      height: 5%;
+      border-radius: 50%;
+      background: #2d1a10;
+    }
+    .hero .eye.left { left: 41%; }
+    .hero .eye.right { right: 41%; }
+    .hero .smile {
+      position: absolute;
+      left: 45%;
+      top: 45%;
+      width: 10%;
+      height: 6%;
+      border-bottom: 3px solid #9f4b32;
+      border-radius: 50%;
+    }
+    .hero .body {
+      position: absolute;
+      left: 24%;
+      top: 52%;
+      width: 52%;
+      height: 38%;
+      border-radius: 26px 26px 14px 14px;
+      background: linear-gradient(135deg, #f66d60, #f5b83b);
+      border: 3px solid #4c2a15;
+    }
+    .hero .scroll {
+      position: absolute;
+      left: 62%;
+      top: 50%;
+      width: 34%;
+      height: 18%;
+      border-radius: 999px;
+      background: #fff8dd;
+      border: 3px solid #9a6a24;
+      transform: rotate(-8deg);
+    }
+    .hero.cheer {
+      animation: cheer 0.82s ease-in-out 2;
+    }
+    .floating-scroll {
+      position: absolute;
+      z-index: 2;
+      left: 45%;
+      top: 16%;
+      width: min(240px, 32%);
+      aspect-ratio: 1.55;
+      border: 4px solid rgba(149, 88, 24, 0.76);
+      border-radius: 18px 18px 28px 28px;
+      background:
+        linear-gradient(90deg, rgba(152, 88, 25, 0.28), transparent 18% 82%, rgba(152, 88, 25, 0.28)),
+        linear-gradient(180deg, #fff5be, #f4d27b);
+      box-shadow: 0 0 38px rgba(255, 219, 92, 0.78), 0 18px 34px rgba(49, 28, 8, 0.28);
+      transform: translateX(-50%) rotate(-2deg);
+      animation: scrollFloat 4.2s ease-in-out infinite;
+    }
+    .floating-scroll::before,
+    .floating-scroll::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 18%;
+      height: 118%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #8b4f21, #d9a455, #8b4f21);
+      transform: translateY(-50%);
+      box-shadow: inset 0 0 0 3px rgba(255, 245, 190, 0.24);
+    }
+    .floating-scroll::before { left: -9%; }
+    .floating-scroll::after { right: -9%; }
+    .scroll-rune {
+      position: absolute;
+      inset: 22% 18%;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #9d3b2f;
+      font-size: clamp(1.15rem, 2.4vw, 2.25rem);
+      font-weight: 950;
+      background: rgba(255, 255, 255, 0.34);
+    }
+    .scroll-piece {
+      position: absolute;
+      z-index: 3;
+      width: clamp(42px, 6vw, 76px);
+      aspect-ratio: 1.12;
+      border: 3px solid rgba(135, 77, 18, 0.72);
+      border-radius: 10px;
+      background: linear-gradient(145deg, #fff4bd, #e9bd62);
+      box-shadow: 0 0 20px rgba(255, 217, 86, 0.58), 0 10px 20px rgba(48, 28, 8, 0.18);
+      animation: pieceFloat 3.8s ease-in-out infinite;
+    }
+    .scroll-piece.one { left: 36%; top: 12%; transform: rotate(-12deg); }
+    .scroll-piece.two { left: 62%; top: 18%; transform: rotate(10deg); animation-delay: 0.4s; }
+    .scroll-piece.three { left: 39%; top: 55%; transform: rotate(8deg); animation-delay: 0.8s; }
+    .scroll-piece.four { left: 66%; top: 52%; transform: rotate(-9deg); animation-delay: 1.2s; }
+    .quest-badge {
+      position: absolute;
+      z-index: 4;
+      right: 18px;
+      top: 16px;
+      min-width: 118px;
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 8px 12px;
+      border: 2px solid rgba(255, 245, 190, 0.7);
+      border-radius: 999px;
+      color: #4a250a;
+      background: linear-gradient(135deg, #fff7bd, #f7b733);
+      box-shadow: 0 0 22px rgba(247, 183, 51, 0.5);
+      font-weight: 950;
+    }
+    .scene-copy {
+      position: relative;
+      z-index: 4;
+      align-self: end;
+      max-width: 620px;
+      margin-left: min(18vw, 180px);
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 8px;
+      background: rgba(20, 35, 42, 0.55);
+      box-shadow: 0 12px 28px rgba(20, 18, 12, 0.22);
+      backdrop-filter: blur(5px);
+    }
+    .scene-copy h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.45rem, 3.5vw, 2.7rem);
+      line-height: 1.08;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+    .scene-copy p {
+      max-width: 760px;
+      margin: 0;
+      font-weight: 900;
+      line-height: 1.55;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+    .poem-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 18px 20px 0;
+    }
+    .poem-head h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      line-height: 1.12;
+    }
+    .author {
+      margin-top: 5px;
+      color: rgba(57, 34, 15, 0.72);
+      font-weight: 950;
+    }
+    .message {
+      min-height: 50px;
+      margin: 14px 20px 0;
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #284120;
+      background: #eaffcf;
+      border: 2px solid rgba(68, 153, 76, 0.2);
+      font-size: clamp(1rem, 2vw, 1.22rem);
+      font-weight: 950;
+      line-height: 1.42;
+    }
+    .message.hint {
+      color: #754417;
+      background: #fff1cb;
+      border-color: rgba(245, 184, 59, 0.44);
+    }
+    .message.win {
+      color: #6c4200;
+      background: #fff4b6;
+      border-color: rgba(245, 184, 59, 0.8);
+      box-shadow: 0 0 28px rgba(245, 184, 59, 0.4);
+    }
+    .play-area {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(260px, 1fr);
+      gap: 16px;
+      padding: 18px 20px 20px;
+    }
+    .tray,
+    .scroll-board {
+      min-height: 380px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 2px solid rgba(116, 72, 21, 0.18);
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .tray h3,
+    .scroll-board h3 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+    }
+    .line-list,
+    .slots {
+      display: grid;
+      gap: 10px;
+    }
+    .poem-line {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border: 2px solid rgba(95, 66, 25, 0.2);
+      border-radius: 8px;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fffdf1, #f8e6b6);
+      box-shadow: 0 8px 14px rgba(89, 49, 15, 0.12);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      text-align: center;
+      font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+      font-weight: 950;
+    }
+    .poem-line:active { cursor: grabbing; }
+    .poem-line.dragging {
+      opacity: 0.42;
+    }
+    .poem-line.ghost {
+      position: fixed;
+      z-index: 80;
+      pointer-events: none;
+      width: min(360px, 72vw);
+      transform: translate(-50%, -50%) rotate(-1deg) scale(1.03);
+      box-shadow: 0 18px 34px rgba(38, 23, 8, 0.28);
+    }
+    .slot {
+      min-height: 74px;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 8px;
+      border: 2px dashed rgba(105, 72, 25, 0.38);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(120, 78, 22, 0.08), transparent),
+        rgba(255, 248, 221, 0.64);
+    }
+    .slot.over {
+      border-color: var(--jade);
+      background: #eafff6;
+    }
+    .slot-num {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fffdf1;
+      background: #8b6231;
+      font-weight: 950;
+    }
+    .slot-content {
+      min-height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: rgba(57, 34, 15, 0.5);
+      background: rgba(255, 255, 255, 0.4);
+      font-weight: 950;
+    }
+    .slot-content .poem-line {
+      width: 100%;
+      min-height: 54px;
+      box-shadow: none;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+      padding: 0 20px 20px;
+    }
+    .progress-stars {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+    .big-star {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      color: rgba(120, 78, 22, 0.3);
+      font-size: 1.45rem;
+      font-weight: 950;
+    }
+    .big-star.on {
+      color: #ad6d00;
+      background: #fff1a8;
+      box-shadow: 0 0 18px rgba(245, 184, 59, 0.46);
+    }
+    .reward-box {
+      display: grid;
+      gap: 10px;
+    }
+    .stamp-card {
+      min-height: 88px;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      border: 3px solid #c54239;
+      border-radius: 8px;
+      color: #b8322d;
+      background: rgba(255, 255, 255, 0.5);
+      font-size: 1.35rem;
+      font-weight: 950;
+      text-align: center;
+    }
+    .complete-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(18, 30, 42, 0.72);
+    }
+    .complete-modal.show {
+      display: grid;
+    }
+    .complete-card {
+      width: min(640px, 100%);
+      padding: clamp(20px, 4vw, 32px);
+      border: 3px solid rgba(245, 184, 59, 0.7);
+      border-radius: 8px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(245, 184, 59, 0.34), transparent 11rem),
+        var(--paper);
+      text-align: center;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+    }
+    .badge {
+      width: min(240px, 70vw);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 18px;
+      border: 8px solid #cb3833;
+      border-radius: 50%;
+      color: #b8322d;
+      background: #fff4c7;
+      font-size: clamp(1.5rem, 6vw, 2.6rem);
+      font-weight: 950;
+      line-height: 1.2;
+      box-shadow: 0 0 0 8px rgba(245, 184, 59, 0.28), 0 18px 32px rgba(63, 42, 18, 0.18);
+    }
+    .sparkle {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 18% 24%, rgba(255, 240, 168, 0.9), transparent 5rem),
+        radial-gradient(circle at 72% 30%, rgba(255, 238, 128, 0.84), transparent 6rem),
+        radial-gradient(circle at 50% 72%, rgba(255, 255, 255, 0.8), transparent 7rem);
+    }
+    .sparkle.show {
+      animation: goldenGlow 1.1s ease forwards;
+    }
+    @keyframes goldenGlow {
+      0% { opacity: 0; transform: scale(0.98); }
+      28% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.04); }
+    }
+    @keyframes cheer {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      32% { transform: translateY(-12px) rotate(-3deg); }
+      64% { transform: translateY(-4px) rotate(3deg); }
+    }
+    @keyframes scrollFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0) rotate(-2deg); }
+      50% { transform: translateX(-50%) translateY(-12px) rotate(1deg); }
+    }
+    @keyframes pieceFloat {
+      0%, 100% { margin-top: 0; }
+      50% { margin-top: -12px; }
+    }
+    @media (max-width: 1060px) {
+      .world {
+        grid-template-columns: 1fr;
+      }
+      .side {
+        order: 2;
+      }
+      .board {
+        order: 1;
+      }
+      .level-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .progress-stars {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+      .status {
+        justify-content: start;
+      }
+      .scene {
+        grid-template-columns: 96px minmax(0, 1fr);
+        min-height: 260px;
+        padding: 12px 14px 0;
+      }
+      .floating-scroll {
+        left: 58%;
+        top: 18%;
+        width: min(190px, 45%);
+      }
+      .scroll-piece.one { left: 36%; top: 16%; }
+      .scroll-piece.two { left: 78%; top: 23%; }
+      .scroll-piece.three { left: 42%; top: 55%; }
+      .scroll-piece.four { left: 76%; top: 58%; }
+      .quest-badge {
+        right: 12px;
+        top: 10px;
+        min-height: 38px;
+        font-size: 0.9rem;
+      }
+      .scene-copy {
+        margin-left: 0;
+        padding: 10px 12px;
+      }
+      .play-area {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+      .poem-head,
+      .message,
+      .controls {
+        margin-left: 14px;
+        margin-right: 14px;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .poem-head {
+        grid-template-columns: 1fr;
+      }
+      .tray,
+      .scroll-board {
+        min-height: auto;
+      }
+      .level-list {
+        grid-template-columns: 1fr;
+      }
+      .progress-stars {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <header class="topbar">
+      <div class="brand">
+        <div class="avatar" aria-hidden="true">詩</div>
+        <div>
+          <h1>失落的詩卷</h1>
+          <p class="subtitle">小小唐詩冒險家，請把四句詩拖到正確位置。</p>
+        </div>
+      </div>
+      <div class="status" aria-live="polite">
+        <span class="pill" id="levelPill">第 1 / 8 題</span>
+        <span class="pill" id="stampPill">唐詩印章 ×0</span>
+        <a class="btn secondary" href="../index.html" style="text-decoration:none;">← 回到大地圖</a>
+        <button class="btn secondary" id="voiceBtn" type="button" aria-pressed="false">開啟語音</button>
+        <button class="btn secondary" id="resetGameBtn" type="button">重新開始</button>
+      </div>
+    </header>
+
+    <section class="world">
+      <aside class="panel side">
+        <h2>詩卷地圖</h2>
+        <div class="level-list" id="levelList"></div>
+        <div class="story-card">
+          <p>唐詩王國的八張神秘詩卷被打亂了。每修復一張詩卷，就能得到一顆星星和唐詩印章。</p>
+        </div>
+      </aside>
+
+      <section class="panel board" aria-label="唐詩排序遊戲">
+        <div class="scene">
+          <div class="quest-badge" id="questBadge">詩卷 1</div>
+          <div class="floating-scroll" aria-hidden="true">
+            <div class="scroll-rune">詩</div>
+          </div>
+          <span class="scroll-piece one" aria-hidden="true"></span>
+          <span class="scroll-piece two" aria-hidden="true"></span>
+          <span class="scroll-piece three" aria-hidden="true"></span>
+          <span class="scroll-piece four" aria-hidden="true"></span>
+          <div class="hero" id="hero" aria-hidden="true">
+            <span class="hat"></span>
+            <span class="hair"></span>
+            <span class="head"></span>
+            <span class="eye left"></span>
+            <span class="eye right"></span>
+            <span class="smile"></span>
+            <span class="body"></span>
+            <span class="scroll"></span>
+          </div>
+          <div class="scene-copy">
+            <h2>唐詩王國任務</h2>
+            <p id="storyText">詩仙李白正在等你修復第一張詩卷。慢慢讀，排對就會發光！</p>
+          </div>
+        </div>
+
+        <div class="poem-head">
+          <div>
+            <h2 id="poemTitle">〈靜夜思〉</h2>
+            <div class="author" id="poemAuthor">李白</div>
+          </div>
+          <button class="btn secondary" id="hintBtn" type="button">提示</button>
+        </div>
+
+        <div class="message" id="message">把左邊詩句拖到右邊卷軸格子裡。</div>
+
+        <div class="play-area">
+          <div class="tray">
+            <h3>打亂的詩句</h3>
+            <div class="line-list" id="lineList"></div>
+          </div>
+          <div class="scroll-board">
+            <h3>修復詩卷</h3>
+            <div class="slots" id="slots"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn secondary" id="clearBtn" type="button">清空本題</button>
+          <button class="btn primary" id="checkBtn" type="button">完成檢查</button>
+        </div>
+      </section>
+
+      <aside class="panel side">
+        <h2>冒險獎勵</h2>
+        <div class="progress-stars" id="progressStars"></div>
+        <div class="reward-box">
+          <div class="stamp-card" id="stampCard">唐詩印章<br>×0</div>
+          <div class="story-card">
+            <h3>詩仙鼓勵</h3>
+            <p id="coachText">答錯也沒關係，可以重新嘗試，不扣分。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="sparkle" id="sparkle"></div>
+
+  <div class="complete-modal" id="completeModal" role="dialog" aria-modal="true" aria-labelledby="completeTitle">
+    <div class="complete-card">
+      <div class="badge">唐詩<br>小達人</div>
+      <h2 id="completeTitle">恭喜完成第一關！</h2>
+      <p>你修復了八張詩卷，獲得「唐詩小達人」徽章，並解鎖第二關「尋找失蹤的詩人」。</p>
+      <button class="btn primary" id="playAgainBtn" type="button">再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    const poems = [
+      {
+        title: "靜夜思",
+        author: "李白",
+        shuffled: ["低頭思故鄉", "床前明月光", "舉頭望明月", "疑是地上霜"],
+        answer: ["床前明月光", "疑是地上霜", "舉頭望明月", "低頭思故鄉"],
+        hint: "先找看見月光的開頭，再想詩人最後想到了什麼。"
+      },
+      {
+        title: "登鸛鵲樓",
+        author: "王之渙",
+        shuffled: ["欲窮千里目", "黃河入海流", "更上一層樓", "白日依山盡"],
+        answer: ["白日依山盡", "黃河入海流", "欲窮千里目", "更上一層樓"],
+        hint: "前兩句先寫風景，後兩句說想看更遠就要爬更高。"
+      },
+      {
+        title: "江雪",
+        author: "柳宗元",
+        shuffled: ["萬徑人蹤滅", "獨釣寒江雪", "孤舟蓑笠翁", "千山鳥飛絕"],
+        answer: ["千山鳥飛絕", "萬徑人蹤滅", "孤舟蓑笠翁", "獨釣寒江雪"],
+        hint: "先從很多山、很多路的寂靜開始，再看到小船上的老翁。"
+      },
+      {
+        title: "鹿柴",
+        author: "王維",
+        shuffled: ["復照青苔上", "空山不見人", "返景入深林", "但聞人語響"],
+        answer: ["空山不見人", "但聞人語響", "返景入深林", "復照青苔上"],
+        hint: "先說看不見人，只聽到聲音，然後光照進樹林。"
+      },
+      {
+        title: "問劉十九",
+        author: "白居易",
+        shuffled: ["能飲一杯無", "綠螘新醅酒", "紅泥小火爐", "晚來天欲雪"],
+        answer: ["綠螘新醅酒", "紅泥小火爐", "晚來天欲雪", "能飲一杯無"],
+        hint: "先準備新酒和小火爐，天快下雪時邀朋友來喝一杯。"
+      },
+      {
+        title: "秋夕",
+        author: "杜牧",
+        shuffled: ["天階夜色涼如水", "臥看牽牛織女星", "銀燭秋光冷畫屏", "輕羅小扇撲流螢"],
+        answer: ["銀燭秋光冷畫屏", "輕羅小扇撲流螢", "天階夜色涼如水", "臥看牽牛織女星"],
+        hint: "先有秋夜燭光和小扇撲螢，最後躺著看星星。"
+      },
+      {
+        title: "回鄉偶書",
+        author: "賀知章",
+        shuffled: ["兒童相見不相識", "少小離家老大回", "鄉音無改鬢毛衰", "笑問客從何處來"],
+        answer: ["少小離家老大回", "鄉音無改鬢毛衰", "兒童相見不相識", "笑問客從何處來"],
+        hint: "先說小時離家、老了回來，再遇到不認識他的兒童。"
+      },
+      {
+        title: "嫦娥",
+        author: "李商隱",
+        shuffled: ["長河漸落曉星沉", "嫦娥應悔偷靈藥", "雲母屏風燭影深", "碧海青天夜夜心"],
+        answer: ["雲母屏風燭影深", "長河漸落曉星沉", "嫦娥應悔偷靈藥", "碧海青天夜夜心"],
+        hint: "先是室內燭影與天上星河，再想到嫦娥的心情。"
+      }
+    ];
+
+    const els = {
+      levelPill: document.getElementById("levelPill"),
+      stampPill: document.getElementById("stampPill"),
+      voiceBtn: document.getElementById("voiceBtn"),
+      resetGameBtn: document.getElementById("resetGameBtn"),
+      levelList: document.getElementById("levelList"),
+      questBadge: document.getElementById("questBadge"),
+      hero: document.getElementById("hero"),
+      storyText: document.getElementById("storyText"),
+      poemTitle: document.getElementById("poemTitle"),
+      poemAuthor: document.getElementById("poemAuthor"),
+      hintBtn: document.getElementById("hintBtn"),
+      message: document.getElementById("message"),
+      lineList: document.getElementById("lineList"),
+      slots: document.getElementById("slots"),
+      clearBtn: document.getElementById("clearBtn"),
+      checkBtn: document.getElementById("checkBtn"),
+      progressStars: document.getElementById("progressStars"),
+      stampCard: document.getElementById("stampCard"),
+      coachText: document.getElementById("coachText"),
+      sparkle: document.getElementById("sparkle"),
+      completeModal: document.getElementById("completeModal"),
+      playAgainBtn: document.getElementById("playAgainBtn")
+    };
+
+    const state = {
+      current: 0,
+      solved: new Set(),
+      activeDrag: null,
+      audioCtx: null,
+      voiceOn: false,
+      voice: null
+    };
+
+    function init() {
+      const saved = JSON.parse(localStorage.getItem("lost_scroll_state") || "null");
+      if (saved && Array.isArray(saved.solved)) {
+        state.current = Math.min(saved.current || 0, poems.length - 1);
+        state.solved = new Set(saved.solved);
+      }
+      renderLevelList();
+      renderStars();
+      renderPoem();
+      bindControls();
+    }
+
+    function save() {
+      localStorage.setItem("lost_scroll_state", JSON.stringify({
+        current: state.current,
+        solved: Array.from(state.solved)
+      }));
+    }
+
+    function renderLevelList() {
+      els.levelList.innerHTML = poems.map((poem, index) => `
+        <button class="level-btn ${index === state.current ? "active" : ""} ${state.solved.has(index) ? "done" : ""}" data-level="${index}" type="button">
+          <span>卷${index + 1}</span>
+          <span class="level-title">〈${poem.title}〉</span>
+          <span class="star">${state.solved.has(index) ? "★" : "☆"}</span>
+        </button>
+      `).join("");
+      document.querySelectorAll("[data-level]").forEach(button => {
+        button.addEventListener("click", () => {
+        state.current = Number(button.dataset.level);
+        renderPoem();
+        renderLevelList();
+        speakCurrentPoem();
+        save();
+      });
+      });
+    }
+
+    function renderStars() {
+      els.progressStars.innerHTML = poems.map((_, index) => `
+        <div class="big-star ${state.solved.has(index) ? "on" : ""}">★</div>
+      `).join("");
+      els.stampPill.textContent = `唐詩印章 ×${state.solved.size}`;
+      els.stampCard.innerHTML = `唐詩印章<br>×${state.solved.size}`;
+    }
+
+    function renderPoem() {
+      const poem = poems[state.current];
+      els.levelPill.textContent = `第 ${state.current + 1} / ${poems.length} 題`;
+      els.questBadge.textContent = `詩卷 ${state.current + 1}`;
+      els.poemTitle.textContent = `〈${poem.title}〉`;
+      els.poemAuthor.textContent = poem.author;
+      els.message.textContent = state.solved.has(state.current)
+        ? "這張詩卷已經修復完成，可以挑戰下一張。"
+        : "把左邊詩句拖到右邊卷軸格子裡。";
+      els.message.className = state.solved.has(state.current) ? "message win" : "message";
+      els.storyText.textContent = `第 ${state.current + 1} 張詩卷是〈${poem.title}〉。讀一讀每句話，找出詩的順序。`;
+      els.coachText.textContent = state.solved.has(state.current)
+        ? "做得好！詩仙李白說：你的詩心亮起來了。"
+        : "答錯也沒關係，可以重新嘗試，不扣分。";
+      renderLines(poem.shuffled);
+      renderSlots();
+    }
+
+    function renderLines(lines) {
+      els.lineList.innerHTML = lines.map(line => lineHtml(line)).join("");
+      bindDraggableLines();
+    }
+
+    function renderSlots() {
+      els.slots.innerHTML = [0, 1, 2, 3].map(index => `
+        <div class="slot" data-slot="${index}">
+          <div class="slot-num">${index + 1}</div>
+          <div class="slot-content" data-slot-content="${index}">拖到這裡</div>
+        </div>
+      `).join("");
+      bindSlots();
+    }
+
+    function lineHtml(line) {
+      return `<div class="poem-line" draggable="true" data-line="${line}" role="button" tabindex="0" aria-label="朗讀：${line}">${line}</div>`;
+    }
+
+    function bindDraggableLines() {
+      document.querySelectorAll(".poem-line").forEach(line => {
+        line.addEventListener("dragstart", event => {
+          event.dataTransfer.setData("text/plain", line.dataset.line);
+          event.dataTransfer.effectAllowed = "move";
+          line.classList.add("dragging");
+        });
+        line.addEventListener("dragend", () => line.classList.remove("dragging"));
+        line.addEventListener("pointerdown", startPointerDrag);
+        line.addEventListener("click", () => speak(line.dataset.line, true));
+        line.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            speak(line.dataset.line, true);
+          }
+        });
+      });
+    }
+
+    function bindSlots() {
+      document.querySelectorAll(".slot").forEach(slot => {
+        slot.addEventListener("dragover", event => {
+          event.preventDefault();
+          slot.classList.add("over");
+        });
+        slot.addEventListener("dragleave", () => slot.classList.remove("over"));
+        slot.addEventListener("drop", event => {
+          event.preventDefault();
+          slot.classList.remove("over");
+          const text = event.dataTransfer.getData("text/plain");
+          const source = Array.from(document.querySelectorAll(".poem-line.dragging"))
+            .find(line => line.dataset.line === text);
+          placeLine(text, slot, source);
+        });
+      });
+    }
+
+    function startPointerDrag(event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      const line = event.currentTarget;
+      const ghost = line.cloneNode(true);
+      ghost.classList.add("ghost");
+      document.body.appendChild(ghost);
+      line.classList.add("dragging");
+      state.activeDrag = { line, ghost, text: line.dataset.line };
+      moveGhost(event.clientX, event.clientY);
+      window.addEventListener("pointermove", movePointerDrag);
+      window.addEventListener("pointerup", endPointerDrag, { once: true });
+    }
+
+    function movePointerDrag(event) {
+      if (!state.activeDrag) return;
+      moveGhost(event.clientX, event.clientY);
+    }
+
+    function moveGhost(x, y) {
+      state.activeDrag.ghost.style.left = `${x}px`;
+      state.activeDrag.ghost.style.top = `${y}px`;
+    }
+
+    function endPointerDrag(event) {
+      if (!state.activeDrag) return;
+      const { line, ghost, text } = state.activeDrag;
+      ghost.remove();
+      line.classList.remove("dragging");
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      const slot = target && target.closest ? target.closest(".slot") : null;
+      if (slot) placeLine(text, slot, line);
+      state.activeDrag = null;
+      window.removeEventListener("pointermove", movePointerDrag);
+    }
+
+    function placeLine(text, slot, source) {
+      const content = slot.querySelector(".slot-content");
+      const oldLine = content.querySelector(".poem-line");
+      if (oldLine) els.lineList.appendChild(oldLine);
+      if (!source) source = findLine(text);
+      if (!source) return;
+      source.classList.remove("dragging");
+      content.textContent = "";
+      content.appendChild(source);
+      refreshSlotPlaceholders();
+      els.message.textContent = "很好，繼續把四句詩排完整。";
+      els.message.className = "message";
+      speak(source.dataset.line, true);
+    }
+
+    function refreshSlotPlaceholders() {
+      document.querySelectorAll(".slot-content").forEach(content => {
+        if (!content.querySelector(".poem-line")) content.textContent = "拖到這裡";
+      });
+    }
+
+    function findLine(text) {
+      return Array.from(document.querySelectorAll(".poem-line"))
+        .find(node => node.dataset.line === text);
+    }
+
+    function currentOrder() {
+      return Array.from(document.querySelectorAll(".slot-content")).map(content => {
+        const line = content.querySelector(".poem-line");
+        return line ? line.dataset.line : "";
+      });
+    }
+
+    function checkAnswer() {
+      const poem = poems[state.current];
+      const order = currentOrder();
+      const empty = order.some(line => !line);
+      if (empty) {
+        showHint("還有空格沒有放詩句喔。先把四句都放上去。");
+        return;
+      }
+      const correct = order.every((line, index) => line === poem.answer[index]);
+      if (!correct) {
+        showHint(poem.hint);
+        return;
+      }
+      markCorrect();
+    }
+
+    function markCorrect() {
+      state.solved.add(state.current);
+      save();
+      playBell();
+      showGlow();
+      cheerHero();
+      els.message.textContent = "金色光芒亮起！詩卷修復成功，獲得唐詩印章 ×1。";
+      els.message.className = "message win";
+      els.coachText.textContent = "詩仙李白說：太棒了，你把詩句排回原本的樣子了！";
+      speak("金色光芒亮起！詩卷修復成功，獲得唐詩印章一枚。詩仙李白說，太棒了！", true);
+      renderStars();
+      renderLevelList();
+      setTimeout(() => {
+        if (state.solved.size === poems.length) {
+          localStorage.setItem("cert_dynasty", "true");
+          els.completeModal.classList.add("show");
+          speak("恭喜完成第一關！你獲得唐詩小達人徽章，並解鎖第二關，尋找失蹤的詩人。", true);
+          return;
+        }
+        const next = poems.findIndex((_, index) => !state.solved.has(index));
+        if (next >= 0) {
+          state.current = next;
+          renderPoem();
+          renderLevelList();
+          save();
+        }
+      }, 1400);
+    }
+
+    function showHint(text) {
+      els.message.textContent = `小提示：${text}`;
+      els.message.className = "message hint";
+      els.coachText.textContent = "沒關係，詩卷還在等你。換個順序再試一次！";
+      speak(`小提示：${text}。沒關係，換個順序再試一次。`, true);
+    }
+
+    function clearCurrent() {
+      const poem = poems[state.current];
+      renderLines(poem.shuffled);
+      renderSlots();
+      els.message.textContent = "已清空本題，再試一次。";
+      els.message.className = "message";
+      speak("已清空本題，再試一次。", true);
+    }
+
+    function toggleVoice() {
+      state.voiceOn = !state.voiceOn;
+      els.voiceBtn.textContent = state.voiceOn ? "關閉語音" : "開啟語音";
+      els.voiceBtn.setAttribute("aria-pressed", String(state.voiceOn));
+      if (state.voiceOn) {
+        pickVoice();
+        speakCurrentPoem(true);
+      } else {
+        stopVoice();
+      }
+    }
+
+    function pickVoice() {
+      if (!("speechSynthesis" in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      const zhVoices = voices.filter(voice => /zh|Chinese|Taiwan|Mandarin/i.test(`${voice.lang} ${voice.name}`));
+      state.voice = zhVoices.find(voice => /Taiwan|zh-TW|Mei-Jia|Hanhan/i.test(`${voice.lang} ${voice.name}`))
+        || zhVoices[0]
+        || voices[0]
+        || null;
+      return state.voice;
+    }
+
+    function speakCurrentPoem(force = false) {
+      const poem = poems[state.current];
+      speak(`第 ${state.current + 1} 題，${poem.title}，${poem.author}。請把詩句排成正確順序。`, force);
+    }
+
+    function speak(text, force = false) {
+      if (!("speechSynthesis" in window)) return;
+      if (!state.voiceOn && !force) return;
+      if (!state.voiceOn) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "zh-TW";
+      utterance.rate = 0.82;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
+      utterance.voice = state.voice || pickVoice();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopVoice() {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function showGlow() {
+      els.sparkle.classList.remove("show");
+      void els.sparkle.offsetWidth;
+      els.sparkle.classList.add("show");
+    }
+
+    function cheerHero() {
+      els.hero.classList.remove("cheer");
+      void els.hero.offsetWidth;
+      els.hero.classList.add("cheer");
+    }
+
+    function playBell() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!state.audioCtx) state.audioCtx = new AudioContext();
+      const ctx = state.audioCtx;
+      const now = ctx.currentTime;
+      [196, 246.94, 392].forEach((frequency, index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        osc.type = "sine";
+        osc.frequency.value = frequency;
+        filter.type = "lowpass";
+        filter.frequency.value = 1400;
+        gain.gain.setValueAtTime(0.0001, now + index * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.22 / (index + 1), now + 0.08 + index * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2 + index * 0.25);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + index * 0.04);
+        osc.stop(now + 2.5 + index * 0.25);
+      });
+    }
+
+    function resetGame() {
+      localStorage.removeItem("lost_scroll_state");
+      state.current = 0;
+      state.solved = new Set();
+      els.completeModal.classList.remove("show");
+      renderLevelList();
+      renderStars();
+      renderPoem();
+    }
+
+    function bindControls() {
+      els.checkBtn.addEventListener("click", checkAnswer);
+      els.clearBtn.addEventListener("click", clearCurrent);
+      els.hintBtn.addEventListener("click", () => showHint(poems[state.current].hint));
+      els.voiceBtn.addEventListener("click", toggleVoice);
+      els.resetGameBtn.addEventListener("click", resetGame);
+      els.playAgainBtn.addEventListener("click", resetGame);
+      if ("speechSynthesis" in window) {
+        pickVoice();
+        window.speechSynthesis.addEventListener("voiceschanged", pickVoice);
+      } else {
+        els.voiceBtn.disabled = true;
+        els.voiceBtn.textContent = "不支援語音";
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
