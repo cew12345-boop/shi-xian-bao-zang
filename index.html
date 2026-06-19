@@ -446,6 +446,7 @@
       inset: 0;
       z-index: 2;
       pointer-events: none;
+      display: none;
     }
     .story-art {
       position: absolute;
@@ -968,11 +969,7 @@
       els.storyImage.hidden = !story.image;
       els.storyHint.textContent = story.hint;
       els.storyText.innerHTML = story.lines.map(line => `<p>${line}</p>`).join("");
-      els.storySky.innerHTML = story.image ? "" : story.sky.map((line, index) => {
-        const left = [12, 62, 28, 76][index % 4];
-        const top = [14, 20, 66, 56][index % 4];
-        return `<span style="position:absolute;left:${left}%;top:${top}%;color:#fff8cf;font-weight:950;text-shadow:0 0 14px rgba(255,226,99,.9);">${line}</span>`;
-      }).join("");
+      els.storySky.innerHTML = "";
       els.storyArt.innerHTML = story.image ? "" : story.art;
       els.storyNextBtn.textContent = type === "ending" ? "看見結局" : "繼續冒險";
       els.storyOverlay.classList.add("show");
