@@ -336,6 +336,292 @@
       line-height: 1.18;
       box-shadow: 0 0 28px rgba(246, 184, 61, 0.54);
     }
+    .story-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      display: none;
+      place-items: center;
+      padding: clamp(14px, 3vw, 32px);
+      background:
+        radial-gradient(circle at 24% 18%, rgba(255, 232, 135, 0.34), transparent 16rem),
+        radial-gradient(circle at 78% 72%, rgba(119, 205, 190, 0.28), transparent 17rem),
+        rgba(18, 32, 47, 0.86);
+    }
+    .story-overlay.show { display: grid; }
+    .story-book {
+      width: min(1040px, 100%);
+      min-height: min(680px, calc(100vh - 48px));
+      display: grid;
+      grid-template-rows: auto minmax(280px, 1fr) auto;
+      gap: clamp(12px, 2vw, 18px);
+      padding: clamp(16px, 3vw, 28px);
+      border: 4px solid rgba(116, 74, 35, 0.34);
+      border-radius: 12px;
+      color: #372111;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(116,74,35,0.08) 1px, transparent 1px),
+        #fff2bf;
+      background-size: 18px 18px, 22px 22px, auto;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.36);
+    }
+    .story-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .story-head h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 3.2vw, 2.8rem);
+      letter-spacing: 0;
+    }
+    .story-kicker {
+      min-height: 34px;
+      display: inline-grid;
+      place-items: center;
+      padding: 6px 12px;
+      border: 2px solid rgba(116, 74, 35, 0.2);
+      border-radius: 999px;
+      color: #6d3d1d;
+      background: rgba(255, 255, 255, 0.44);
+      font-weight: 950;
+    }
+    .story-scene {
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+      border: 4px solid rgba(116, 74, 35, 0.22);
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 246, 184, 0.88), transparent 16rem),
+        linear-gradient(#a9dff5 0 48%, #f6dca1 49% 100%);
+      box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.22);
+    }
+    .story-scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.26;
+      background:
+        repeating-linear-gradient(8deg, rgba(116, 74, 35, 0.13) 0 2px, transparent 2px 9px),
+        repeating-linear-gradient(96deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px 7px);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+    .story-scene::after {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: -12%;
+      height: 32%;
+      border-radius: 50% 50% 0 0;
+      background: rgba(86, 155, 104, 0.48);
+      filter: blur(1px);
+    }
+    .story-image {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .story-scene.has-image::before {
+      z-index: 2;
+      opacity: 0.16;
+    }
+    .story-scene.has-image::after { display: none; }
+    .story-scene[data-scene="seals"] { background: linear-gradient(#8dd3ef 0 42%, #f4c986 43% 100%); }
+    .story-scene[data-scene="door"] { background: linear-gradient(#88d5f4 0 54%, #f9dfaa 55% 100%); }
+    .story-scene[data-scene="poets"] { background: radial-gradient(circle at 50% 25%, #fff3b8, transparent 14rem), linear-gradient(#7097d1, #d9e7ff 56%, #f6d69e); }
+    .story-scene[data-scene="map"] { background: linear-gradient(#ffe0a2 0 42%, #c8edbd 43% 100%); }
+    .story-scene[data-scene="ending"] { background: linear-gradient(#ffd37c 0 45%, #8fc68f 46% 100%); }
+    .sky-line {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .story-art {
+      position: absolute;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      text-align: center;
+    }
+    .stone-door {
+      left: 50%;
+      bottom: 14%;
+      width: min(280px, 34vw);
+      height: min(330px, 38vw);
+      transform: translateX(-50%);
+      border: 10px solid #8b725b;
+      border-radius: 46% 46% 8px 8px;
+      color: #fff9dc;
+      background: linear-gradient(90deg, #8a7a68 0 49%, #6d5e50 50% 100%);
+      box-shadow: 0 0 48px rgba(255, 213, 83, 0.72);
+    }
+    .treasure-slot {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border: 4px solid #ffe59a;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.28);
+      box-shadow: 0 0 22px rgba(255, 223, 99, 0.85);
+    }
+    .treasure-slot:nth-child(1) { left: 18%; top: 28%; }
+    .treasure-slot:nth-child(2) { right: 18%; top: 28%; }
+    .treasure-slot:nth-child(3) { left: 22%; bottom: 24%; }
+    .treasure-slot:nth-child(4) { right: 22%; bottom: 24%; }
+    .child {
+      left: 16%;
+      bottom: 13%;
+      width: 110px;
+      height: 150px;
+      border-radius: 48px 48px 20px 20px;
+      color: #7b3f23;
+      background: #ffe0b2;
+      box-shadow: inset 0 -68px #79b7d8, 0 10px 20px rgba(70, 46, 26, 0.18);
+    }
+    .child::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      width: 48px;
+      height: 32px;
+      border-radius: 0 0 28px 28px;
+      background: #4d2c1c;
+    }
+    .scroll-road {
+      left: 50%;
+      bottom: 7%;
+      width: min(440px, 48vw);
+      height: 110px;
+      transform: translateX(-50%) rotate(-2deg);
+      border: 4px solid rgba(122, 78, 35, 0.36);
+      border-radius: 999px 999px 28px 28px;
+      background: #fff4c4;
+      box-shadow: 0 12px 22px rgba(80, 51, 22, 0.18);
+    }
+    .cloud-step {
+      position: absolute;
+      z-index: 3;
+      left: 48%;
+      bottom: 18%;
+      width: 44%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 28px -34px 0 rgba(255,255,255,0.65), 64px -68px 0 rgba(255,255,255,0.5), 102px -102px 0 rgba(255,255,255,0.45);
+      transform: rotate(-22deg);
+    }
+    .poet-stars {
+      inset: 0;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      padding: 9% 12% 18%;
+      gap: 12px;
+    }
+    .poet-stars span {
+      display: grid;
+      place-items: center;
+      min-height: 92px;
+      border-radius: 50%;
+      color: #fff8d6;
+      background: rgba(255, 244, 181, 0.24);
+      box-shadow: 0 0 28px rgba(255, 241, 153, 0.55);
+      text-shadow: 0 2px 12px rgba(36, 49, 87, 0.52);
+    }
+    .new-map {
+      left: 50%;
+      bottom: 14%;
+      width: min(500px, 58vw);
+      min-height: 210px;
+      transform: translateX(-50%) rotate(-3deg);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 22px;
+      border: 6px solid #a86b35;
+      border-radius: 12px;
+      background: #fff0b3;
+      box-shadow: 0 16px 28px rgba(78, 50, 25, 0.2);
+    }
+    .new-map span {
+      padding: 10px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.48);
+    }
+    .star-path {
+      inset: 0;
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding-top: 10%;
+      color: #fff9cd;
+      font-size: clamp(1.6rem, 5vw, 3.5rem);
+      text-shadow: 0 0 18px rgba(255, 243, 151, 0.85);
+    }
+    .story-text {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border-left: 6px solid rgba(246, 184, 61, 0.82);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.45);
+      font-size: clamp(1.05rem, 2.3vw, 1.38rem);
+      font-weight: 950;
+      line-height: 1.7;
+    }
+    .story-text p { margin: 0; }
+    .story-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .story-hint {
+      color: rgba(55, 33, 17, 0.72);
+      font-weight: 950;
+    }
+    .ending-card {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      color: #ffeaa0;
+      background: #070706;
+      text-align: center;
+      cursor: pointer;
+    }
+    .ending-card.show { display: grid; animation: fadeIn 0.65s ease both; }
+    .ending-card h2 {
+      margin: 0 0 18px;
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      letter-spacing: 0;
+      text-shadow: 0 0 22px rgba(255, 221, 95, 0.72);
+    }
+    .ending-card p {
+      margin: 8px 0;
+      color: #fff3c3;
+      font-size: clamp(1.05rem, 2.5vw, 1.55rem);
+      font-weight: 950;
+      line-height: 1.7;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
     @keyframes wrongFlash {
       0%, 100% { transform: translateX(0); border-color: rgba(112, 70, 24, 0.32); background: rgba(255, 255, 255, 0.44); }
       50% { transform: translateX(5px); border-color: var(--rose); background: #ffe0dc; }
@@ -364,6 +650,11 @@
       }
       .slots { grid-template-columns: 1fr; }
       .btn, .held { min-height: 40px; }
+      .story-book { min-height: calc(100svh - 28px); }
+      .story-scene { min-height: 280px; }
+      .child { left: 8%; transform: scale(0.82); transform-origin: bottom left; }
+      .stone-door { width: 180px; height: 230px; }
+      .treasure-slot { width: 40px; height: 40px; }
     }
   </style>
 </head>
@@ -400,6 +691,37 @@
       </div>
     </section>
   </main>
+
+  <div class="story-overlay" id="storyOverlay" role="dialog" aria-modal="true" aria-labelledby="storyTitle">
+    <article class="story-book">
+      <div class="story-head">
+        <div>
+          <span class="story-kicker" id="storyKicker">結局過場</span>
+          <h2 id="storyTitle">《詩光未盡》</h2>
+        </div>
+        <button class="btn secondary" id="storyCloseBtn" type="button">返回地圖</button>
+      </div>
+      <div class="story-scene" id="storyScene" data-scene="seals">
+        <img class="story-image" id="storyImage" src="" alt="">
+        <div class="sky-line" id="storySky"></div>
+        <div class="story-art" id="storyArt"></div>
+      </div>
+      <div class="story-text" id="storyText"></div>
+      <div class="story-actions">
+        <span class="story-hint" id="storyHint">彩色蠟筆畫冊翻開了一頁。</span>
+        <button class="btn" id="storyNextBtn" type="button">繼續</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="ending-card" id="endingCard" role="button" tabindex="0" aria-label="結局畫面，點擊返回主畫面">
+    <div>
+      <h2>✨ 冒險完成 ✨</h2>
+      <p>《四印之謎：唐詩冒險王》</p>
+      <p>感謝你的旅程</p>
+      <p>（點擊返回主畫面）</p>
+    </div>
+  </div>
 
   <div class="modal" id="gateModal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
     <div class="dialog">
@@ -459,10 +781,126 @@
       }
     ];
 
+    const stories = {
+      poem: {
+        kicker: "過場圖 1",
+        title: "《詩光未盡》 四印歸位",
+        scene: "seals",
+        image: "四印歸位.png",
+        hint: "石門聽見文字的腳步聲。",
+        lines: [
+          "有些寶藏藏在山裡，",
+          "有些寶藏藏在故事裡。",
+          "而有些寶藏，一直藏在文字發光的地方。"
+        ],
+        sky: ["床前明月光", "黃河入海流", "空山不見人", "春風吹又生"],
+        art: `
+          <div class="story-art stone-door">
+            <span class="treasure-slot">水晶</span>
+            <span class="treasure-slot">玉佩</span>
+            <span class="treasure-slot">翡翠</span>
+            <span class="treasure-slot">印章</span>
+          </div>
+          <div class="story-art child">小勇者</div>
+        `
+      },
+      word: {
+        kicker: "過場圖 2",
+        title: "《詩光未盡》 詩仙之門開啟",
+        scene: "door",
+        image: "詩仙之門開啟.png",
+        hint: "門後吹來雲海的風。",
+        lines: [
+          "門後沒有金銀珠寶。",
+          "只有無數還沒讀過的故事，",
+          "等待下一位旅人發現。"
+        ],
+        sky: ["雲海", "卷軸", "月光", "遠山"],
+        art: `
+          <div class="story-art stone-door">詩仙<br>之門</div>
+          <div class="cloud-step"></div>
+          <div class="story-art child">孩子</div>
+        `
+      },
+      image: {
+        kicker: "過場圖 3",
+        title: "《詩光未盡》 詩人們的身影",
+        scene: "poets",
+        image: "詩人們的身影.png",
+        hint: "雲裡有山，山裡有詩。",
+        lines: [
+          "有些人離開了很久。",
+          "但他們留下的月光、河流、高樓與春草，",
+          "依然在世間慢慢生長。"
+        ],
+        sky: ["月光", "河流", "高樓", "春草"],
+        art: `
+          <div class="story-art poet-stars">
+            <span>李白</span>
+            <span>杜甫</span>
+            <span>王維</span>
+            <span>白居易</span>
+          </div>
+        `
+      },
+      poet: {
+        kicker: "過場圖 4",
+        title: "《詩光未盡》 新的地圖",
+        scene: "map",
+        image: "新的地圖png.png",
+        hint: "晨光把卷軸邊緣染成金色。",
+        lines: [
+          "原來旅程從來沒有終點。",
+          "每翻開一頁，",
+          "世界就會再大一點點。"
+        ],
+        sky: ["晨光", "新路", "遠方", "下一頁"],
+        art: `
+          <div class="story-art new-map">
+            <span>宋詞森林</span>
+            <span>成語山谷</span>
+            <span>詩經湖泊</span>
+            <span>神話群島</span>
+          </div>
+          <div class="story-art child">孩子</div>
+        `
+      },
+      ending: {
+        kicker: "過場圖 5",
+        title: "《詩光未盡》 走向遠方",
+        scene: "ending",
+        image: "走向遠方.png",
+        hint: "四枚寶物在天上變成星星。",
+        lines: [
+          "故事寫完了。",
+          "但路還很長。",
+          "而下一首詩，正在前方等你。"
+        ],
+        sky: ["詩句水晶", "文字玉佩", "詩意翡翠", "詩人印章"],
+        art: `
+          <div class="story-art star-path">✦　✦　✦　✦</div>
+          <div class="story-art scroll-road"></div>
+          <div class="story-art child">小背包</div>
+        `
+      }
+    };
+
     const els = {
       cover: document.getElementById("cover"),
       heldCount: document.getElementById("heldCount"),
       clearBtn: document.getElementById("clearBtn"),
+      storyOverlay: document.getElementById("storyOverlay"),
+      storyKicker: document.getElementById("storyKicker"),
+      storyTitle: document.getElementById("storyTitle"),
+      storyScene: document.getElementById("storyScene"),
+      storyImage: document.getElementById("storyImage"),
+      storySky: document.getElementById("storySky"),
+      storyArt: document.getElementById("storyArt"),
+      storyText: document.getElementById("storyText"),
+      storyHint: document.getElementById("storyHint"),
+      storyNextBtn: document.getElementById("storyNextBtn"),
+      storyCloseBtn: document.getElementById("storyCloseBtn"),
+      endingCard: document.getElementById("endingCard"),
       gateModal: document.getElementById("gateModal"),
       slots: document.getElementById("slots"),
       backpack: document.getElementById("backpack"),
@@ -476,6 +914,7 @@
 
     const placed = new Map();
     let activeDrag = null;
+    let storyTarget = null;
 
     function init() {
       if (!localStorage.getItem("adventure_start")) {
@@ -515,6 +954,52 @@
     function openGate() {
       renderGate();
       els.gateModal.classList.add("show");
+    }
+
+    function openStory(type, targetHref) {
+      const story = stories[type];
+      storyTarget = { type, targetHref };
+      els.storyKicker.textContent = story.kicker;
+      els.storyTitle.textContent = story.title;
+      els.storyScene.dataset.scene = story.scene;
+      els.storyScene.classList.toggle("has-image", Boolean(story.image));
+      els.storyImage.src = story.image || "";
+      els.storyImage.alt = story.title;
+      els.storyImage.hidden = !story.image;
+      els.storyHint.textContent = story.hint;
+      els.storyText.innerHTML = story.lines.map(line => `<p>${line}</p>`).join("");
+      els.storySky.innerHTML = story.sky.map((line, index) => {
+        const left = [12, 62, 28, 76][index % 4];
+        const top = [14, 20, 66, 56][index % 4];
+        return `<span style="position:absolute;left:${left}%;top:${top}%;color:#fff8cf;font-weight:950;text-shadow:0 0 14px rgba(255,226,99,.9);">${line}</span>`;
+      }).join("");
+      els.storyArt.innerHTML = story.image ? "" : story.art;
+      els.storyNextBtn.textContent = type === "ending" ? "看見結局" : "繼續冒險";
+      els.storyOverlay.classList.add("show");
+    }
+
+    function closeStory() {
+      els.storyOverlay.classList.remove("show");
+      storyTarget = null;
+    }
+
+    function continueStory() {
+      if (!storyTarget) return;
+      if (storyTarget.type === "ending") {
+        closeStory();
+        showEndingCard();
+        return;
+      }
+      sessionStorage.setItem("adventure_cover_seen", "true");
+      window.location.href = storyTarget.targetHref;
+    }
+
+    function showEndingCard() {
+      els.endingCard.classList.add("show");
+    }
+
+    function hideEndingCard() {
+      els.endingCard.classList.remove("show");
     }
 
     function renderGate() {
@@ -635,15 +1120,20 @@
       document.querySelectorAll(".hotspot").forEach(hotspot => {
         hotspot.addEventListener("click", () => {
           if (hotspot.dataset.action === "gate") {
-            openGate();
+            openStory("ending");
             return;
           }
           const level = levels[Number(hotspot.dataset.index)];
-          sessionStorage.setItem("adventure_cover_seen", "true");
-          window.location.href = level.href;
+          openStory(level.type, level.href);
         });
       });
       els.clearBtn.addEventListener("click", () => clearAll(false));
+      els.storyNextBtn.addEventListener("click", continueStory);
+      els.storyCloseBtn.addEventListener("click", closeStory);
+      els.endingCard.addEventListener("click", hideEndingCard);
+      els.endingCard.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") hideEndingCard();
+      });
       els.resetSlotsBtn.addEventListener("click", renderGate);
       els.closeModalBtn.addEventListener("click", () => els.gateModal.classList.remove("show"));
       els.againBtn.addEventListener("click", () => {
