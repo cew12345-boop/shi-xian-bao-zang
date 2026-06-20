@@ -521,6 +521,11 @@
     .poem-line.dragging {
       opacity: 0.42;
     }
+    .poem-line.selected {
+      border-color: var(--jade);
+      background: #eafff6;
+      box-shadow: 0 0 0 4px rgba(31, 156, 130, 0.18), 0 8px 14px rgba(89, 49, 15, 0.12);
+    }
     .poem-line.ghost {
       position: fixed;
       z-index: 80;
@@ -957,6 +962,7 @@
       current: 0,
       solved: new Set(),
       activeDrag: null,
+      selectedLine: null,
       suppressClick: false,
       audioCtx: null,
       voiceOn: false,
@@ -1010,6 +1016,7 @@
     }
 
     function renderPoem() {
+      clearSelectedLine();
       const poem = poems[state.current];
       els.levelPill.textContent = `第 ${state.current + 1} / ${poems.length} 題`;
       els.questBadge.textContent = `詩卷 ${state.current + 1}`;
@@ -1017,7 +1024,7 @@
       els.poemAuthor.textContent = poem.author;
       els.message.textContent = state.solved.has(state.current)
         ? "這張詩卷已經修復完成，可以挑戰下一張。"
-        : "把左邊詩句拖到右邊卷軸格子裡。";
+        : "可以拖曳詩句，也可以先點選詩句，再點右邊空格。";
       els.message.className = state.solved.has(state.current) ? "message win" : "message";
       els.storyText.textContent = `第 ${state.current + 1} 張詩卷是〈${poem.title}〉。讀一讀每句話，找出詩的順序。`;
       els.coachText.textContent = state.solved.has(state.current)
@@ -1056,17 +1063,18 @@
         line.addEventListener("dragend", () => line.classList.remove("dragging"));
         line.addEventListener("pointerdown", startPointerDrag);
         line.addEventListener("click", event => {
+          event.stopPropagation();
           if (state.suppressClick) {
             event.preventDefault();
             state.suppressClick = false;
             return;
           }
-          speak(line.dataset.line, true);
+          selectLine(line);
         });
         line.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            speak(line.dataset.line, true);
+            selectLine(line);
           }
         });
       });
@@ -1087,6 +1095,14 @@
             .find(line => line.dataset.line === text);
           placeLine(text, slot, source);
         });
+        slot.addEventListener("click", () => {
+          if (!state.selectedLine) {
+            els.message.textContent = "請先點選一個詩句，再點這個空格。";
+            els.message.className = "message hint";
+            return;
+          }
+          placeLine(state.selectedLine.dataset.line, slot, state.selectedLine);
+        });
       });
     }
 
@@ -1094,6 +1110,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       const line = event.currentTarget;
       if (!line.dataset.line) return;
+      if (event.pointerType === "mouse") return;
       event.preventDefault();
       const ghost = line.cloneNode(true);
       ghost.classList.add("ghost");
@@ -1151,6 +1168,27 @@
       window.removeEventListener("pointercancel", cancelPointerDrag);
     }
 
+    function selectLine(line) {
+      if (!line || !line.dataset.line) return;
+      if (state.selectedLine === line) {
+        clearSelectedLine();
+        els.message.textContent = "已取消選取。請選一個詩句，再點右邊空格。";
+        els.message.className = "message";
+        return;
+      }
+      clearSelectedLine();
+      state.selectedLine = line;
+      line.classList.add("selected");
+      els.message.textContent = "已選取詩句，請點右邊要放入的空格。";
+      els.message.className = "message hint";
+      speak(line.dataset.line, true);
+    }
+
+    function clearSelectedLine() {
+      if (state.selectedLine) state.selectedLine.classList.remove("selected");
+      state.selectedLine = null;
+    }
+
     function cancelPointerDrag() {
       if (!state.activeDrag) return;
       const { line, ghost } = state.activeDrag;
@@ -1186,8 +1224,10 @@
       if (!source) source = findLine(text);
       if (!source) return;
       source.classList.remove("dragging");
+      source.classList.remove("selected");
       content.textContent = "";
       content.appendChild(source);
+      if (state.selectedLine === source) state.selectedLine = null;
       refreshSlotPlaceholders();
       els.message.textContent = "很好，繼續把四句詩排完整。";
       els.message.className = "message";
@@ -1265,10 +1305,11 @@
     }
 
     function clearCurrent() {
+      clearSelectedLine();
       const poem = poems[state.current];
       renderLines(poem.shuffled);
       renderSlots();
-      els.message.textContent = "已清空本題，再試一次。";
+      els.message.textContent = "已清空本題。請先點選詩句，再點右邊空格，或直接拖曳。";
       els.message.className = "message";
       speak("已清空本題，再試一次。", true);
     }
