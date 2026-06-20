@@ -729,9 +729,18 @@
       renderProgress();
     }
 
+    function shuffled(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+      }
+      return result;
+    }
+
     function renderChoices() {
       const question = questions[state.current];
-      els.choices.innerHTML = question.choices.map((choice, index) => `
+      els.choices.innerHTML = shuffled(question.choices).map((choice, index) => `
         <button class="choice" data-choice="${choice}" type="button">${String.fromCharCode(65 + index)}.\n${choice}</button>
       `).join("");
       els.choices.querySelectorAll("[data-choice]").forEach(button => {
@@ -741,7 +750,7 @@
 
     function renderAuthors() {
       const question = questions[state.current];
-      els.authorGrid.innerHTML = question.authors.map(author => `
+      els.authorGrid.innerHTML = shuffled(question.authors).map(author => `
         <button class="author" data-author="${author}" type="button">${author}</button>
       `).join("");
       els.authorGrid.classList.add("show");
