@@ -511,6 +511,8 @@
       box-shadow: 0 8px 14px rgba(89, 49, 15, 0.12);
       cursor: grab;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
       touch-action: none;
       text-align: center;
       font-size: clamp(1.2rem, 2.4vw, 1.65rem);
@@ -956,6 +958,7 @@
       current: 0,
       solved: new Set(),
       activeDrag: null,
+      suppressClick: false,
       audioCtx: null,
       voiceOn: false,
       voice: null
@@ -1053,7 +1056,14 @@
         });
         line.addEventListener("dragend", () => line.classList.remove("dragging"));
         line.addEventListener("pointerdown", startPointerDrag);
-        line.addEventListener("click", () => speak(line.dataset.line, true));
+        line.addEventListener("click", event => {
+          if (state.suppressClick) {
+            event.preventDefault();
+            state.suppressClick = false;
+            return;
+          }
+          speak(line.dataset.line, true);
+        });
         line.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
@@ -1083,20 +1093,40 @@
 
     function startPointerDrag(event) {
       if (event.button !== undefined && event.button !== 0) return;
+      if (event.pointerType === "mouse") return;
       const line = event.currentTarget;
+      if (!line.dataset.line) return;
+      event.preventDefault();
       const ghost = line.cloneNode(true);
       ghost.classList.add("ghost");
+      ghost.removeAttribute("id");
+      ghost.setAttribute("aria-hidden", "true");
       document.body.appendChild(ghost);
       line.classList.add("dragging");
-      state.activeDrag = { line, ghost, text: line.dataset.line };
+      state.activeDrag = {
+        line,
+        ghost,
+        text: line.dataset.line,
+        startX: event.clientX,
+        startY: event.clientY,
+        moved: false,
+        overSlot: null
+      };
+      line.setPointerCapture?.(event.pointerId);
       moveGhost(event.clientX, event.clientY);
       window.addEventListener("pointermove", movePointerDrag);
       window.addEventListener("pointerup", endPointerDrag, { once: true });
+      window.addEventListener("pointercancel", cancelPointerDrag, { once: true });
     }
 
     function movePointerDrag(event) {
       if (!state.activeDrag) return;
+      event.preventDefault();
+      const dx = event.clientX - state.activeDrag.startX;
+      const dy = event.clientY - state.activeDrag.startY;
+      if (Math.hypot(dx, dy) > 7) state.activeDrag.moved = true;
       moveGhost(event.clientX, event.clientY);
+      updatePointerSlot(event.clientX, event.clientY);
     }
 
     function moveGhost(x, y) {
@@ -1106,14 +1136,49 @@
 
     function endPointerDrag(event) {
       if (!state.activeDrag) return;
-      const { line, ghost, text } = state.activeDrag;
+      event.preventDefault();
+      const { line, ghost, text, moved } = state.activeDrag;
       ghost.remove();
       line.classList.remove("dragging");
+      clearPointerSlot();
       const target = document.elementFromPoint(event.clientX, event.clientY);
       const slot = target && target.closest ? target.closest(".slot") : null;
       if (slot) placeLine(text, slot, line);
+      if (moved) {
+        state.suppressClick = true;
+        window.setTimeout(() => { state.suppressClick = false; }, 350);
+      }
       state.activeDrag = null;
       window.removeEventListener("pointermove", movePointerDrag);
+      window.removeEventListener("pointercancel", cancelPointerDrag);
+    }
+
+    function cancelPointerDrag() {
+      if (!state.activeDrag) return;
+      const { line, ghost } = state.activeDrag;
+      ghost.remove();
+      line.classList.remove("dragging");
+      clearPointerSlot();
+      state.activeDrag = null;
+      window.removeEventListener("pointermove", movePointerDrag);
+    }
+
+    function updatePointerSlot(x, y) {
+      const target = document.elementFromPoint(x, y);
+      const slot = target && target.closest ? target.closest(".slot") : null;
+      if (slot === state.activeDrag.overSlot) return;
+      clearPointerSlot();
+      if (slot) {
+        slot.classList.add("over");
+        state.activeDrag.overSlot = slot;
+      }
+    }
+
+    function clearPointerSlot() {
+      if (state.activeDrag?.overSlot) {
+        state.activeDrag.overSlot.classList.remove("over");
+        state.activeDrag.overSlot = null;
+      }
     }
 
     function placeLine(text, slot, source) {
